@@ -2,7 +2,7 @@
 
 This is the Git-managed source project for DocumentGeeks.com.
 
-## What changed in V8
+## What changed in V9
 
 - Rebuilt `public/services.html` from the Document Geeks service-page wording supplied by the owner.
 - Restored the three original service images through their existing Wix-hosted URLs.
@@ -53,3 +53,8 @@ npm run deploy
 ```
 
 Keeping the same `name` in `wrangler.jsonc` updates the same Worker rather than creating a new Worker.
+
+
+## V9 contact form update
+
+Removed development/preview messaging from the public contact form. Until a server-side Cloudflare mail endpoint is connected, submitting the form opens a prepared email to Info@DocumentGeeks.com so the customer can review and send the request from their email application.
