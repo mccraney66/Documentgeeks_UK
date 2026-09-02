@@ -15,7 +15,7 @@
   const form = document.querySelector('#contact-form');
   const note = document.querySelector('#form-note');
   if (form && note) {
-    form.addEventListener('submit', (event) => {
+    form.addEventListener('submit', async (event) => {
       event.preventDefault();
       if (!form.checkValidity()) {
         form.reportValidity();
@@ -23,30 +23,44 @@
       }
 
       const data = new FormData(form);
-      const firstName = String(data.get('firstName') || '').trim();
-      const lastName = String(data.get('lastName') || '').trim();
-      const email = String(data.get('email') || '').trim();
-      const phone = String(data.get('phone') || '').trim();
-      const service = String(data.get('service') || 'New Order').trim();
-      const message = String(data.get('message') || '').trim();
-      const smsConsent = data.get('smsConsent') ? 'Yes' : 'No';
+      const payload = {
+        firstName: String(data.get('firstName') || '').trim(),
+        lastName: String(data.get('lastName') || '').trim(),
+        email: String(data.get('email') || '').trim(),
+        phone: String(data.get('phone') || '').trim(),
+        service: String(data.get('service') || 'New Order').trim(),
+        message: String(data.get('message') || '').trim(),
+        smsConsent: Boolean(data.get('smsConsent'))
+      };
 
-      const subject = `Document Geeks Request - ${service}`;
-      const body = [
-        `Name: ${firstName} ${lastName}`,
-        `Email: ${email}`,
-        `Phone: ${phone || 'Not provided'}`,
-        `Service: ${service}`,
-        `SMS opt-in: ${smsConsent}`,
-        '',
-        'Message:',
-        message
-      ].join('\n');
-
-      note.textContent = 'Your email app should open with your request filled in. Review the message and click Send.';
+      const submitBtn = form.querySelector('.submit-btn');
+      if (submitBtn) submitBtn.disabled = true;
       note.setAttribute('role', 'status');
+      note.style.color = '';
+      note.textContent = 'Sending your request…';
 
-      window.location.href = `mailto:info@documentgeeks.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      try {
+        const res = await fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const result = await res.json().catch(() => ({}));
+
+        if (res.ok && result.ok) {
+          note.textContent = "Thanks! Your message has been sent — we'll be in touch soon.";
+          note.style.color = '#8af5ca';
+          form.reset();
+        } else {
+          note.textContent = result.error || 'Something went wrong sending your message. Please call or email us directly.';
+          note.style.color = '#ff8a8a';
+        }
+      } catch (err) {
+        note.textContent = 'Something went wrong sending your message. Please call or email us directly.';
+        note.style.color = '#ff8a8a';
+      } finally {
+        if (submitBtn) submitBtn.disabled = false;
+      }
     });
   }
 })();
