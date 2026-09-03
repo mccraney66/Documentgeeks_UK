@@ -3,6 +3,9 @@
         "git ls-remote": true,
         "git init": true,
         "git remote": true,
-        "git add": true
+        "git add": true,
+        "New-Item": true,
+        "Out-Null": true,
+        "npm install": true
     }
 }
