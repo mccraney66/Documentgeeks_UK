@@ -57,14 +57,8 @@ async function handleContact(request, env) {
     }, 500);
   }
 
-  const fromEmail = clean(env.CONTACT_FROM_EMAIL, 254);
+  const fromEmail = clean(env.CONTACT_FROM_EMAIL || "noreply@dgls.xyz", 254);
   const toEmail = clean(env.CONTACT_TO_EMAIL || "Info@DocumentGeeks.com", 254);
-  if (!fromEmail) {
-    return jsonResponse({
-      ok: false,
-      error: "CONTACT_FROM_EMAIL is not configured. Set it to a sender verified by SMTP2GO.",
-    }, 500);
-  }
 
   const fullName = `${firstName} ${lastName}`;
   const textBody = [
