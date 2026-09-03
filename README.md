@@ -1,50 +1,37 @@
-# Document Geeks — Node.js SMTP server + Static Assets
+# Document Geeks — Cloudflare Worker + Static Assets
 
-The site serves the contact form from Node.js and sends submissions through
-SMTP2GO's SMTP relay on port 587. The SMTP password must only exist in the
-server environment.
+The contact form sends submissions through SMTP2GO's HTTPS API.
 
-## Required server settings
+## Cloudflare settings
 
-Configure these environment variables on the Node.js server:
+In the `documentgeeks-uk` Worker, open **Settings > Variables and Secrets**:
 
-```env
-SMTP_HOST=mail.smtp2go.com
-SMTP_PORT=587
-SMTP_USER=leirret@dgls.xyz
-SMTP_PASSWORD=your-smtp2go-password
-CONTACT_FROM_EMAIL=noreply@dgls.xyz
-CONTACT_TO_EMAIL=Info@DocumentGeeks.com
-```
+1. Add `SMTP2GO_API_KEY` as a **Secret**.
+2. Add `CONTACT_FROM_EMAIL` as a variable using a sender verified in SMTP2GO.
+3. Add `CONTACT_TO_EMAIL` as a variable, normally `Info@DocumentGeeks.com`.
 
-`CONTACT_FROM_EMAIL` must be a sender verified in SMTP2GO. Never commit the
-password or `.dev.vars`.
+Do not commit `.dev.vars` or the API key.
 
-## Important SMTP2GO requirement
+## Local test
 
-`CONTACT_FROM_EMAIL` must be authorized in your SMTP2GO account. If you use `noreply@dgls.xyz`, then `dgls.xyz` (or that sender address) must be verified in SMTP2GO.
-
-## Run
+Install Wrangler, then from the repository root run:
 
 ```bash
 npm install
-npm start
+npx wrangler dev
 ```
 
-The Node.js server serves files from `public/` and handles `POST /api/contact`.
-Point the domain's reverse proxy to the Node.js process (default port `3000`).
-Cloudflare Workers cannot send through SMTP port 587, so do not deploy the
-contact handler with `wrangler deploy`.
+Wrangler loads local values from `.dev.vars`. Replace its API-key placeholder
+with a valid SMTP2GO HTTP API key before testing. The local URL is usually
+`http://localhost:8787`.
 
-## How the form works
+## Deploy
 
-- `public/contact.html` contains the form.
-- `public/assets/main.js` POSTs JSON to `/api/contact`.
-- `server.js` validates the form and sends mail through SMTP2GO.
-- `public/assets/main.js` submits the form to `/api/contact`.
+After the local test succeeds:
 
-## Troubleshooting
+```bash
+npx wrangler deploy
+```
 
-If the form fails, the page now displays the actual SMTP2GO failure message when available.
-
-You can also view Worker logs in Cloudflare Dashboard. The Worker logs the SMTP2GO response (never the API key).
+Static files are served from `public/`, while `/api/contact` is handled by
+`src/index.js`.
