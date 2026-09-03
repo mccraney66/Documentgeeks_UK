@@ -6,6 +6,10 @@
         "git add": true,
         "New-Item": true,
         "Out-Null": true,
-        "npm install": true
+        "npm install": true,
+        "/^node --check server\\.js; node --check public\\\\assets\\\\main\\.js; node --check assets\\\\main\\.js$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
     }
 }

@@ -1,49 +1,47 @@
-# Document Geeks — Cloudflare Worker + Static Assets
+# Document Geeks — Node.js SMTP server + Static Assets
 
-This version connects the website contact form directly to `/api/contact` and sends messages using SMTP2GO.
+The site serves the contact form from Node.js and sends submissions through
+SMTP2GO's SMTP relay on port 587. The SMTP password must only exist in the
+server environment.
 
-## Required Cloudflare settings
+## Required server settings
 
-In Cloudflare Dashboard, open the **`documentgeeks-uk` Worker**, then go to **Settings > Variables and Secrets**.
+Configure these environment variables on the Node.js server:
 
-Create these values:
+```env
+SMTP_HOST=mail.smtp2go.com
+SMTP_PORT=587
+SMTP_USER=leirret@dgls.xyz
+SMTP_PASSWORD=your-smtp2go-password
+CONTACT_FROM_EMAIL=noreply@dgls.xyz
+CONTACT_TO_EMAIL=Info@DocumentGeeks.com
+```
 
-1. `SMTP2GO_API_KEY` — **Secret** — your SMTP2GO API key.
-2. `CONTACT_FROM_EMAIL` — Variable — an email address or domain sender that is VERIFIED in SMTP2GO. Example only: `noreply@documentgeeks.com`.
-3. `CONTACT_TO_EMAIL` — Variable — `Info@DocumentGeeks.com`.
-
-Do **not** put the SMTP2GO API key into `wrangler.jsonc` or any file committed to GitHub.
+`CONTACT_FROM_EMAIL` must be a sender verified in SMTP2GO. Never commit the
+password or `.dev.vars`.
 
 ## Important SMTP2GO requirement
 
 `CONTACT_FROM_EMAIL` must be authorized in your SMTP2GO account. If you use `noreply@dgls.xyz`, then `dgls.xyz` (or that sender address) must be verified in SMTP2GO.
 
-## Deploy
+## Run
 
 ```bash
 npm install
-npx wrangler deploy
+npm start
 ```
 
-Or connect this repository to the existing **`documentgeeks-uk`** Worker under **Settings > Builds** and push to the production branch.
-
-If the deployed Worker reports that `SMTP2GO_API_KEY` is not configured, add the
-secret to that Worker before deploying:
-
-```bash
-npx wrangler secret put SMTP2GO_API_KEY
-```
-
-Paste the SMTP2GO API key when Wrangler prompts for it. Secrets are not included
-by `wrangler deploy`, so this command must be run once for each Worker
-environment (such as production or staging).
+The Node.js server serves files from `public/` and handles `POST /api/contact`.
+Point the domain's reverse proxy to the Node.js process (default port `3000`).
+Cloudflare Workers cannot send through SMTP port 587, so do not deploy the
+contact handler with `wrangler deploy`.
 
 ## How the form works
 
 - `public/contact.html` contains the form.
 - `public/assets/main.js` POSTs JSON to `/api/contact`.
-- `src/index.js` validates the form and calls SMTP2GO.
-- Static site files continue to be served through the `ASSETS` binding.
+- `server.js` validates the form and sends mail through SMTP2GO.
+- `public/assets/main.js` submits the form to `/api/contact`.
 
 ## Troubleshooting
 
