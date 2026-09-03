@@ -27,6 +27,17 @@ npx wrangler deploy
 
 Or connect this repository to the existing Cloudflare Worker under **Settings > Builds** and push to the production branch.
 
+If the deployed Worker reports that `SMTP2GO_API_KEY` is not configured, add the
+secret to that Worker before deploying:
+
+```bash
+npx wrangler secret put SMTP2GO_API_KEY
+```
+
+Paste the SMTP2GO API key when Wrangler prompts for it. Secrets are not included
+by `wrangler deploy`, so this command must be run once for each Worker
+environment (such as production or staging).
+
 ## How the form works
 
 - `public/contact.html` contains the form.
