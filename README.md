@@ -1,30 +1,41 @@
-# Document Geeks dark-mode redesign v2
+# Document Geeks — Cloudflare Worker + Static Assets
 
-This revision rebuilds the site around the original Wix Document Geeks content and voice while keeping the dark modern look.
+This version connects the website contact form directly to `/api/contact` and sends messages using SMTP2GO.
 
-## Key corrections
-- Incorrect third-party ownership language removed.
-- Company name restored to Document Geeks, LLC.
-- Location updated to Perris, CA 92571.
-- Original tagline and service personality restored.
-- Original service categories restored: on-site scanning, digital archival, records destruction, technical support, legal service of process, courier services and tiered technical support.
-- Team, clients and FAQ sections rebuilt from the original site.
-- Optional SMS opt-in and SMS terms retained.
+## Required Cloudflare settings
 
-## Before publishing
-1. Review team roster and direct mobile numbers.
-2. Confirm which legacy client names you still want to display.
-3. Confirm current process-serving credentials/claims before adding license or success-rate language.
-4. Confirm current service-plan prices before publishing pricing. Legacy prices were intentionally not presented as current.
-5. Connect the contact form to a Cloudflare-compatible endpoint (Worker/Pages Function or CRM).
-6. Point documentgeeks.com DNS to the Cloudflare Pages project after testing the preview URL.
+In Cloudflare Dashboard, open the **same Worker** used for Document Geeks, then go to **Settings > Variables and Secrets**.
 
-## Cloudflare Pages
-Use the project folder as a static Pages deployment. No build command is required. The output directory is the project root. `_headers` and `_redirects` are included.
+Create these values:
 
+1. `SMTP2GO_API_KEY` — **Secret** — your SMTP2GO API key.
+2. `CONTACT_FROM_EMAIL` — Variable — an email address or domain sender that is VERIFIED in SMTP2GO. Example only: `noreply@documentgeeks.com`.
+3. `CONTACT_TO_EMAIL` — Variable — `Info@DocumentGeeks.com`.
 
-## V3 privacy/SMS update
-- Fax updated to 951-744-1322.
-- Expanded privacy policy with standard website privacy sections, California privacy language, data retention/security, and a dedicated SMS/Text Messaging Privacy Policy section.
-- SMS mobile opt-in data is stated not to be sold or shared for third-party marketing; necessary messaging providers may process it to deliver the service.
-- Standalone SMS Terms retained and strengthened.
+Do **not** put the SMTP2GO API key into `wrangler.jsonc` or any file committed to GitHub.
+
+## Important SMTP2GO requirement
+
+`CONTACT_FROM_EMAIL` must be authorized in your SMTP2GO account. If you use `noreply@dgls.xyz`, then `dgls.xyz` (or that sender address) must be verified in SMTP2GO.
+
+## Deploy
+
+```bash
+npm install
+npx wrangler deploy
+```
+
+Or connect this repository to the existing Cloudflare Worker under **Settings > Builds** and push to the production branch.
+
+## How the form works
+
+- `public/contact.html` contains the form.
+- `public/assets/main.js` POSTs JSON to `/api/contact`.
+- `src/index.js` validates the form and calls SMTP2GO.
+- Static site files continue to be served through the `ASSETS` binding.
+
+## Troubleshooting
+
+If the form fails, the page now displays the actual SMTP2GO failure message when available.
+
+You can also view Worker logs in Cloudflare Dashboard. The Worker logs the SMTP2GO response (never the API key).
