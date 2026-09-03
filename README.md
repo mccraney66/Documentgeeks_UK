@@ -4,7 +4,7 @@ This version connects the website contact form directly to `/api/contact` and se
 
 ## Required Cloudflare settings
 
-In Cloudflare Dashboard, open the **same Worker** used for Document Geeks, then go to **Settings > Variables and Secrets**.
+In Cloudflare Dashboard, open the **`documentgeeks-uk` Worker**, then go to **Settings > Variables and Secrets**.
 
 Create these values:
 
@@ -25,7 +25,7 @@ npm install
 npx wrangler deploy
 ```
 
-Or connect this repository to the existing Cloudflare Worker under **Settings > Builds** and push to the production branch.
+Or connect this repository to the existing **`documentgeeks-uk`** Worker under **Settings > Builds** and push to the production branch.
 
 If the deployed Worker reports that `SMTP2GO_API_KEY` is not configured, add the
 secret to that Worker before deploying:
